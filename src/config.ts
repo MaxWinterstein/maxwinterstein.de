@@ -16,9 +16,7 @@ export const site = {
   /** One-line tagline under the name. */
   tagline: "DevOps engineer.",
   /** Short sentence(s) for the intro paragraph + the <meta description>. */
-  intro:
-    "Hi — I'm Max Winterstein. I build and run software. " +
-    "You can reach me at the links below.",
+  intro: "Hi — I'm Max Winterstein. I build and run software.",
   /** Locale for <html lang>. */
   lang: "en",
 };
