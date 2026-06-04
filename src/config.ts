@@ -14,7 +14,7 @@ export const site = {
   /** Brand / personal name shown in the hero and the browser tab. */
   name: "Max Winterstein",
   /** One-line tagline under the name. */
-  tagline: "Software engineer.",
+  tagline: "DevOps engineer.",
   /** Short sentence(s) for the intro paragraph + the <meta description>. */
   intro:
     "Hi — I'm Max Winterstein. I build and run software. " +
