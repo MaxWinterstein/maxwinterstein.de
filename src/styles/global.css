@@ -1,8 +1,8 @@
 :root {
-  --bg: #010409;
-  --term: #0d1117;
-  --bar: #161b22;
-  --border: #30363d;
+  --bg: #161c2e;
+  --term: #1b2233;
+  --bar: #222a3d;
+  --border: #333d52;
   --fg: #c9d1d9;
   --muted: #8b949e;
   --green: #3fb950;
@@ -28,12 +28,15 @@ body {
   display: grid;
   place-items: center;
   padding: 1.5rem 1rem;
-  background: var(--bg);
-  background-image: radial-gradient(
-    ellipse at 50% 0%,
-    rgba(63, 185, 80, 0.08),
-    transparent 60%
-  );
+  background-color: var(--bg);
+  /* Soft color glows instead of harsh black: cool blue top-left, teal bottom-right,
+     a whisper of green to echo the prompt accent. */
+  background-image:
+    radial-gradient(1100px 620px at 12% -8%, rgba(120, 180, 255, 0.18), transparent 60%),
+    radial-gradient(1000px 700px at 108% 112%, rgba(180, 150, 255, 0.16), transparent 55%),
+    radial-gradient(820px 520px at 92% 6%, rgba(255, 180, 130, 0.1), transparent 60%),
+    radial-gradient(900px 900px at 50% 55%, rgba(63, 185, 80, 0.05), transparent 70%);
+  background-attachment: fixed;
   color: var(--fg);
   font-family: ui-monospace, "SFMono-Regular", "SF Mono", Menlo, Consolas,
     "Liberation Mono", "Courier New", monospace;
@@ -54,8 +57,9 @@ main {
   overflow: hidden;
   background: var(--term);
   box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.4),
-    0 24px 60px -20px rgba(0, 0, 0, 0.8);
+    0 0 0 1px rgba(120, 160, 255, 0.06),
+    0 18px 50px -18px rgba(0, 0, 0, 0.65),
+    0 0 80px -30px rgba(88, 166, 255, 0.25);
 }
 
 .titlebar {

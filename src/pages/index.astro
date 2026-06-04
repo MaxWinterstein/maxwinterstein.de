@@ -34,7 +34,7 @@ const contacts = links.map(({ label, href }) => ({
         <span class="line out"><h1>{site.name}</h1></span>
         <span class="gap"></span>
 
-        <span class="line"><span class="u">guest@{host}</span><span class="p">:~</span><span class="sym">$ </span><span class="cmd">cat role</span></span>
+        <span class="line"><span class="u">guest@{host}</span><span class="p">:~</span><span class="sym">$ </span><span class="cmd">cat role.txt</span></span>
         <span class="line accent">{site.tagline}</span>
         <span class="gap"></span>
 
@@ -115,7 +115,7 @@ const contacts = links.map(({ label, href }) => ({
           "  help                 show this message",
           "  whoami               print my name",
           "  ls [contact/]        list files",
-          "  cat <file>           print a file (role, about.txt)",
+          "  cat <file>           print a file (role.txt, about.txt)",
           "  email | github | linkedin   open a profile",
           "  open <name>          open a contact link",
           "  neofetch             system info",
@@ -161,11 +161,11 @@ const contacts = links.map(({ label, href }) => ({
         case "ls":
           if (args[0] && args[0].toLowerCase().startsWith("contact"))
             print(contacts.map((c) => c.label).join("  "), "out");
-          else print("about.txt  role  contact/", "out");
+          else print("about.txt  role.txt  contact/", "out");
           break;
         case "cat": {
           const f = (args[0] || "").toLowerCase();
-          if (f === "role") print(tagline, "accent");
+          if (f === "role.txt" || f === "role") print(tagline, "accent");
           else if (f === "about.txt" || f === "about") print(intro, "out");
           else if (!f) print("cat: missing file operand", "out");
           else print("cat: " + args[0] + ": No such file or directory", "out");
@@ -300,7 +300,7 @@ const contacts = links.map(({ label, href }) => ({
 
       const steps = [
         { cmd: "whoami", run: printName },
-        { cmd: "cat role", run: () => print(tagline, "accent") },
+        { cmd: "cat role.txt", run: () => print(tagline, "accent") },
         { cmd: "cat about.txt", run: () => print(intro, "out") },
         { cmd: "ls contact/", run: renderContacts },
       ];
