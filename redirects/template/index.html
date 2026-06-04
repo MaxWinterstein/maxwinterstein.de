@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Redirecting…</title>
+    <!-- Tells search engines the canonical home of this content. -->
+    <link rel="canonical" href="https://__CANONICAL__/" />
+    <!-- Fallback redirect if JS is disabled. -->
+    <meta http-equiv="refresh" content="0; url=https://__CANONICAL__/" />
+    <meta name="robots" content="noindex" />
+    <script>
+      // Preserve the visitor's path/query/hash when forwarding.
+      var c = "https://__CANONICAL__";
+      location.replace(c + location.pathname + location.search + location.hash);
+    </script>
+  </head>
+  <body>
+    <p>Redirecting to <a href="https://__CANONICAL__/">__CANONICAL__</a>…</p>
+  </body>
+</html>

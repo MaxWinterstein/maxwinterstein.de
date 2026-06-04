@@ -1,0 +1,27 @@
+---
+import Base from "../layouts/Base.astro";
+import { site, links } from "../config";
+
+const knownIcons = new Set(["mail", "github", "x", "linkedin", "link"]);
+---
+
+<Base>
+  <section class="hero">
+    <h1>{site.name}</h1>
+    <p class="tagline">{site.tagline}</p>
+    <p class="intro">{site.intro}</p>
+
+    <nav class="links" aria-label="Contact and social links">
+      {
+        links.map(({ label, href, icon }) => (
+          <a href={href} rel="me noopener">
+            <svg class="icon" aria-hidden="true">
+              <use href={`#i-${knownIcons.has(icon) ? icon : "link"}`} />
+            </svg>
+            <span>{label}</span>
+          </a>
+        ))
+      }
+    </nav>
+  </section>
+</Base>
