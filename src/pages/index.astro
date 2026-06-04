@@ -67,6 +67,8 @@ const contacts = links.map(({ label, href }) => ({
     </div>
   </div>
 
+  <p class="pagefoot"><a href="/datenschutz/">Datenschutz</a></p>
+
   <script define:vars={{ host, name: site.name, tagline: site.tagline, intro: site.intro, contacts }}>
     const screen = document.getElementById("screen");
     const output = document.getElementById("output");
@@ -122,6 +124,7 @@ const contacts = links.map(({ label, href }) => ({
           "  date                 current date/time",
           "  echo <text>          print text",
           "  clear                clear the screen  (ctrl+l)",
+          "  datenschutz          open the privacy notice",
         ].join("\n"),
         "out",
       );
@@ -184,6 +187,10 @@ const contacts = links.map(({ label, href }) => ({
           c ? openLink(c) : print("open: unknown target: " + (args[0] || ""), "out");
           break;
         }
+        case "datenschutz": case "privacy":
+          print("opening /datenschutz …", "dim");
+          window.location.href = "/datenschutz/";
+          break;
         case "sudo":
           print("we trust you have received the usual lecture. permission denied 😏", "out");
           break;

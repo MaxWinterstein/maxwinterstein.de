@@ -1,0 +1,96 @@
+---
+import Base from "../layouts/Base.astro";
+import { site, CANONICAL_DOMAIN } from "../config";
+---
+
+<Base
+  title={`Datenschutz — ${site.name}`}
+  description={`Datenschutzerklärung für ${CANONICAL_DOMAIN}`}
+>
+  <div class="terminal">
+    <div class="titlebar">
+      <span class="dot r"></span>
+      <span class="dot y"></span>
+      <span class="dot g"></span>
+      <span class="title">cat datenschutz.txt</span>
+    </div>
+
+    <div class="doc">
+      <h1>Datenschutzerklärung</h1>
+      <p class="lead">Privates, nicht-kommerzielles Projekt.</p>
+
+      <h2>Verantwortlicher</h2>
+      <p>
+        {site.name} · <a href="mailto:hello@maxwinterstein.de">hello@maxwinterstein.de</a>
+      </p>
+
+      <h2>Hosting</h2>
+      <p>
+        Diese Seite wird über GitHub Pages (GitHub, Inc., USA) ausgeliefert. Beim
+        Aufruf überträgt dein Browser technisch notwendige Daten (u. a. IP-Adresse,
+        Zeitpunkt, angeforderte Datei, User-Agent), die GitHub zur Auslieferung und
+        Absicherung in Server-Logs verarbeitet. Rechtsgrundlage: Art. 6 Abs. 1 lit. f
+        DSGVO (sicherer, funktionsfähiger Betrieb). Details:
+        <a href="https://docs.github.com/site-policy" rel="noopener">docs.github.com/site-policy</a>.
+      </p>
+
+      <h2>Cookies &amp; Tracking</h2>
+      <p>
+        Diese Seite setzt keine Cookies, nutzt keinen Local Storage und bindet keine
+        Analyse- oder Tracking-Dienste ein.
+      </p>
+
+      <p>
+        Fragen zu deinen Daten sowie dein Beschwerderecht bei einer Aufsichtsbehörde:
+        <a href="mailto:hello@maxwinterstein.de">hello@maxwinterstein.de</a>.
+      </p>
+
+      <p class="stand">Stand: Juni 2026</p>
+      <a class="back" href="/">← cd ~</a>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .doc {
+    padding: 1.4rem 1.6rem 1.8rem;
+  }
+  .doc h1 {
+    margin: 0 0 0.2rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--white);
+  }
+  .doc .lead {
+    color: var(--muted);
+    margin: 0 0 1rem;
+  }
+  .doc h2 {
+    margin: 1.3rem 0 0.25rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--green);
+  }
+  .doc p {
+    margin: 0.2rem 0;
+    color: var(--fg);
+    max-width: 40rem;
+  }
+  .doc a {
+    color: var(--blue);
+    text-decoration: none;
+  }
+  .doc a:hover {
+    text-decoration: underline;
+  }
+  .stand {
+    color: var(--muted);
+    margin-top: 1.4rem !important;
+    font-size: 0.85rem;
+  }
+  .back {
+    display: inline-block;
+    margin-top: 0.6rem;
+    color: var(--muted) !important;
+  }
+</style>

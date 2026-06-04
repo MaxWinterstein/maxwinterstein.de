@@ -157,6 +157,23 @@ h1 {
   height: 0.6rem;
 }
 
+.pagefoot {
+  position: fixed;
+  right: 0.85rem;
+  bottom: 0.55rem;
+  margin: 0;
+  font-size: 0.7rem;
+  z-index: 5;
+}
+.pagefoot a {
+  color: var(--muted);
+  text-decoration: none;
+}
+.pagefoot a:hover {
+  color: var(--blue);
+  text-decoration: underline;
+}
+
 .contact {
   display: grid;
   grid-template-columns: max-content 1fr;
