@@ -239,6 +239,109 @@ const contacts = links.map(({ label, href }) => ({
       if (e.target.closest("a")) return;
       if (!window.getSelection().toString()) input.focus();
     });
-    input.focus();
+
+    // ── self-playing boot sequence ──────────────────────────────
+    const inputline = document.getElementById("inputline");
+    let skipped = false;
+    const sleep = (ms) => new Promise((r) => setTimeout(r, skipped ? 0 : ms));
+
+    async function typeText(el, text, speed) {
+      for (let i = 0; i < text.length; i++) {
+        if (skipped) {
+          el.textContent = text;
+          return;
+        }
+        el.textContent += text[i];
+        await sleep(speed + Math.random() * 45);
+      }
+    }
+
+    function addGap() {
+      const g = document.createElement("span");
+      g.className = "gap";
+      output.appendChild(g);
+    }
+
+    function renderContacts() {
+      const wrap = document.createElement("div");
+      wrap.className = "contact";
+      for (const c of contacts) {
+        const k = document.createElement("span");
+        k.className = "k";
+        k.textContent = c.label;
+        const a = document.createElement("a");
+        a.className = "link";
+        a.href = c.href;
+        a.rel = "me noopener";
+        a.textContent = c.display;
+        wrap.append(k, a);
+      }
+      output.appendChild(wrap);
+    }
+
+    function printName() {
+      const d = document.createElement("div");
+      d.className = "line out";
+      const h = document.createElement("h1");
+      h.textContent = name;
+      d.appendChild(h);
+      output.appendChild(d);
+    }
+
+    async function boot() {
+      inputline.style.display = "none";
+      const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduce) {
+        inputline.style.display = "";
+        input.focus();
+        return;
+      }
+      output.replaceChildren(); // clear the static session, then replay it live
+
+      const steps = [
+        { cmd: "whoami", run: printName },
+        { cmd: "cat role", run: () => print(tagline, "accent") },
+        { cmd: "cat about.txt", run: () => print(intro, "out") },
+        { cmd: "ls contact/", run: renderContacts },
+      ];
+
+      for (const s of steps) {
+        const line = document.createElement("div");
+        line.className = "line";
+        line.innerHTML = promptHTML();
+        const cmdEl = document.createElement("span");
+        cmdEl.className = "cmd";
+        const cur = document.createElement("span");
+        cur.className = "cursor";
+        line.append(cmdEl, cur);
+        output.appendChild(line);
+        scrollBottom();
+
+        await sleep(320);
+        await typeText(cmdEl, s.cmd, 70);
+        await sleep(240); // pause before "enter"
+        cur.remove();
+        s.run();
+        addGap();
+        scrollBottom();
+        await sleep(430);
+      }
+
+      const h = document.createElement("div");
+      h.className = "line dim";
+      h.id = "hint";
+      h.textContent = "type `help` and press enter";
+      output.appendChild(h);
+      inputline.style.display = "";
+      input.focus();
+      scrollBottom();
+    }
+
+    // Any key or click fast-forwards the intro.
+    const skip = () => (skipped = true);
+    window.addEventListener("keydown", skip, { once: true });
+    screen.addEventListener("click", skip, { once: true });
+
+    boot();
   </script>
 </Base>
