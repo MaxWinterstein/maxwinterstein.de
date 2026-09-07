@@ -1,5 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
+import Prompt from "../components/Prompt.astro";
+import Titlebar from "../components/Titlebar.astro";
 import { site, links, CANONICAL_DOMAIN } from "../config";
 
 const host = CANONICAL_DOMAIN;
@@ -11,344 +13,132 @@ const display = (href: string) =>
     .replace(/^https?:\/\//, "")
     .replace(/\/$/, "");
 
-// Data passed to the client-side shell so commands stay config-driven.
 const contacts = links.map(({ label, href }) => ({
+  // Lowercased because the shell compares against the lowercased typed word;
+  // a `Mastodon` label would otherwise be listed but not runnable.
   label: label.toLowerCase(),
   href,
   display: display(href),
 }));
+
+// The commands the intro replays. Each string is the single source for both
+// the server-rendered prompt line and the text the intro types into it.
+const CMD = {
+  who: "whoami",
+  role: "cat role.txt",
+  about: "cat about.txt",
+  contact: "ls contact/",
+};
+
+// The shell's virtual filesystem — drives `ls`, `cat` and tab completion.
+const files = {
+  "role.txt": { text: site.tagline, cls: "accent" },
+  "about.txt": { text: site.about.join("\n"), cls: "out" },
+  "datenschutz.txt": {
+    text: `Keine Cookies, kein Local Storage, keine Analyse- oder Tracking-Dienste.\nVolltext: https://${host}/datenschutz/`,
+    cls: "out",
+  },
+};
+
+// Handed to the shell through a data attribute rather than `define:vars`: that
+// directive forces `is:inline`, and Astro only emits CSP hashes for scripts it
+// processes, so an inline script would be blocked by our own policy.
+const shell = {
+  host,
+  siteName: site.name,
+  tagline: site.tagline,
+  contacts,
+  files,
+};
 ---
 
 <Base>
   <div class="terminal">
-    <div class="titlebar">
-      <span class="dot r"></span>
-      <span class="dot y"></span>
-      <span class="dot g"></span>
-      <span class="title">guest@{host}: ~</span>
-    </div>
+    <Titlebar title={`guest@${host}: ~`} interactive />
 
-    <div class="screen" id="screen">
-      <div id="output">
-        <span class="line"><span class="u">guest@{host}</span><span class="p">:~</span><span class="sym">$ </span><span class="cmd">whoami</span></span>
-        <span class="line out"><h1>{site.name}</h1></span>
-        <span class="gap"></span>
-
-        <span class="line"><span class="u">guest@{host}</span><span class="p">:~</span><span class="sym">$ </span><span class="cmd">cat role.txt</span></span>
-        <span class="line accent">{site.tagline}</span>
-        <span class="gap"></span>
-
-        <span class="line"><span class="u">guest@{host}</span><span class="p">:~</span><span class="sym">$ </span><span class="cmd">cat about.txt</span></span>
-        <span class="line out">{site.intro}</span>
-        <span class="gap"></span>
-
-        <span class="line"><span class="u">guest@{host}</span><span class="p">:~</span><span class="sym">$ </span><span class="cmd">ls contact/</span></span>
-        <div class="contact">
-          {
-            contacts.map((c) => (
-              <>
-                <span class="k">{c.label}</span>
-                <a class="link" href={c.href} rel="me noopener">
-                  {c.display}
-                </a>
-              </>
-            ))
-          }
+    <div class="screen" id="screen" data-shell={JSON.stringify(shell)}>
+      {
+        /*
+        The intro *reveals* these server-rendered blocks rather than rebuilding
+        them, so there is exactly one copy of the session in the codebase and
+        no-JS visitors and crawlers see the finished article.
+      */
+      }
+      <div id="output" aria-live="polite">
+        <div class="cmdblock" data-cmd={CMD.who}>
+          <div class="line"><Prompt /><span class="cmd">{CMD.who}</span></div>
+          <div class="blockout">
+            <div class="line out"><h1>{site.name}</h1></div><span class="gap"
+            ></span>
+          </div>
         </div>
-        <span class="gap"></span>
 
-        <span class="line dim" id="hint">type `help` and press enter</span>
+        <div class="cmdblock" data-cmd={CMD.role}>
+          <div class="line"><Prompt /><span class="cmd">{CMD.role}</span></div>
+          <div class="blockout">
+            <div class="line accent">{site.tagline}</div><span class="gap"
+            ></span>
+          </div>
+        </div>
+
+        <div class="cmdblock" data-cmd={CMD.about}>
+          <div class="line"><Prompt /><span class="cmd">{CMD.about}</span></div>
+          <div class="blockout">
+            {site.about.map((l) => <div class="line out">{l}</div>)}<span
+              class="gap"></span>
+          </div>
+        </div>
+
+        <div class="cmdblock" data-cmd={CMD.contact}>
+          <div class="line">
+            <Prompt /><span class="cmd">{CMD.contact}</span>
+          </div>
+          <div class="blockout">
+            <div class="contact">
+              {
+                contacts.map((c) => (
+                  <>
+                    <span class="k">{c.label}</span>
+                    <a class="link" href={c.href} rel="me">
+                      {c.display}
+                    </a>
+                  </>
+                ))
+              }
+            </div><span class="gap"></span>
+          </div>
+        </div>
+
+        <div class="line dim" id="hint">type `help` and press enter</div>
       </div>
 
       <div class="line inputline" id="inputline">
-        <span class="u">guest@{host}</span><span class="p">:~</span><span class="sym">$ </span><span id="typed"></span><span class="cursor" aria-hidden="true"></span>
-        <input id="cmd" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="terminal command input" />
+        <Prompt /><span id="typed" aria-hidden="true"></span><span
+          class="cursor"
+          aria-hidden="true"></span>
+        <input
+          id="cmd"
+          autocomplete="off"
+          autocapitalize="off"
+          autocorrect="off"
+          spellcheck="false"
+          enterkeyhint="go"
+          aria-label="terminal command input"
+        />
       </div>
     </div>
   </div>
 
   <p class="pagefoot"><a href="/datenschutz/">Datenschutz</a></p>
 
-  <script define:vars={{ host, name: site.name, tagline: site.tagline, intro: site.intro, contacts }}>
-    const screen = document.getElementById("screen");
-    const output = document.getElementById("output");
-    const input = document.getElementById("cmd");
-    const typed = document.getElementById("typed");
-    const hint = document.getElementById("hint");
-
-    const history = [];
-    let hidx = 0; // points one past the last entry
-
-    const scrollBottom = () => (screen.scrollTop = screen.scrollHeight);
-
-    const promptHTML = () =>
-      `<span class="u">guest@${host}</span><span class="p">:~</span><span class="sym">$ </span>`;
-
-    function echoCommand(cmd) {
-      const line = document.createElement("div");
-      line.className = "line";
-      line.innerHTML = promptHTML();
-      const c = document.createElement("span");
-      c.className = "cmd";
-      c.textContent = cmd;
-      line.appendChild(c);
-      output.appendChild(line);
-    }
-
-    function print(text, cls) {
-      for (const t of String(text).split("\n")) {
-        const div = document.createElement("div");
-        div.className = "line" + (cls ? " " + cls : "");
-        div.textContent = t;
-        output.appendChild(div);
-      }
-    }
-
-    function openLink(c) {
-      print("opening " + c.href + " …", "dim");
-      const mail = c.href.startsWith("mailto:");
-      window.open(c.href, mail ? "_self" : "_blank", "noopener");
-    }
-
-    function help() {
-      print(
-        [
-          "available commands:",
-          "  help                 show this message",
-          "  whoami               print my name",
-          "  ls [contact/]        list files",
-          "  cat <file>           print a file (role.txt, about.txt)",
-          "  email | github | linkedin   open a profile",
-          "  open <name>          open a contact link",
-          "  neofetch             system info",
-          "  date                 current date/time",
-          "  echo <text>          print text",
-          "  clear                clear the screen  (ctrl+l)",
-          "  datenschutz          open the privacy notice",
-        ].join("\n"),
-        "out",
-      );
-    }
-
-    function neofetch() {
-      print(
-        [
-          name,
-          "-------------------------",
-          "OS:      maxOS (terminal edition)",
-          "host:    " + host,
-          "shell:   max-sh 1.0",
-          "role:    " + tagline,
-          "contact: " + contacts.map((c) => c.label).join(" · "),
-        ].join("\n"),
-        "out",
-      );
-    }
-
-    function execute(raw) {
-      const line = raw.trim();
-      echoCommand(raw);
-      if (!line) return;
-      const parts = line.split(/\s+/);
-      const cmd = parts[0].toLowerCase();
-      const args = parts.slice(1);
-
-      switch (cmd) {
-        case "help": case "?": help(); break;
-        case "whoami": print(name, "out"); break;
-        case "pwd": print("/home/guest", "out"); break;
-        case "date": print(new Date().toString(), "out"); break;
-        case "echo": print(args.join(" "), "out"); break;
-        case "neofetch": case "uname": neofetch(); break;
-        case "clear": case "cls": output.innerHTML = ""; break;
-        case "ls":
-          if (args[0] && args[0].toLowerCase().startsWith("contact"))
-            print(contacts.map((c) => c.label).join("  "), "out");
-          else print("about.txt  role.txt  contact/", "out");
-          break;
-        case "cat": {
-          const f = (args[0] || "").toLowerCase();
-          if (f === "role.txt" || f === "role") print(tagline, "accent");
-          else if (f === "about.txt" || f === "about") print(intro, "out");
-          else if (!f) print("cat: missing file operand", "out");
-          else print("cat: " + args[0] + ": No such file or directory", "out");
-          break;
-        }
-        case "contact": case "contacts":
-          contacts.forEach((c) => print(c.label + "  " + c.display, "out"));
-          break;
-        case "email": case "github": case "linkedin": {
-          const c = contacts.find((x) => x.label === cmd);
-          c ? openLink(c) : print("no such contact: " + cmd, "out");
-          break;
-        }
-        case "open": {
-          const c = contacts.find((x) => x.label === (args[0] || "").toLowerCase());
-          c ? openLink(c) : print("open: unknown target: " + (args[0] || ""), "out");
-          break;
-        }
-        case "datenschutz": case "privacy":
-          print("opening /datenschutz …", "dim");
-          window.location.href = "/datenschutz/";
-          break;
-        case "sudo":
-          print("we trust you have received the usual lecture. permission denied 😏", "out");
-          break;
-        case "exit": case "quit":
-          print("there is no escape from the terminal 🌀", "dim");
-          break;
-        default:
-          print("command not found: " + cmd + " — type `help`", "out");
-      }
-    }
-
-    function sync() {
-      typed.textContent = input.value;
-    }
-
-    input.addEventListener("input", sync);
-
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        const v = input.value;
-        if (v.trim()) {
-          history.push(v);
-          if (hint) hint.remove();
-        }
-        hidx = history.length;
-        execute(v);
-        input.value = "";
-        sync();
-        scrollBottom();
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        if (hidx > 0) {
-          hidx--;
-          input.value = history[hidx] || "";
-          sync();
-        }
-      } else if (e.key === "ArrowDown") {
-        e.preventDefault();
-        if (hidx < history.length) {
-          hidx++;
-          input.value = history[hidx] || "";
-          sync();
-        }
-      } else if (e.key === "l" && e.ctrlKey) {
-        e.preventDefault();
-        output.innerHTML = "";
-      }
-    });
-
-    // Keep the prompt focused; don't steal focus while selecting text or clicking links.
-    document.querySelector(".terminal").addEventListener("click", (e) => {
-      if (e.target.closest("a")) return;
-      if (!window.getSelection().toString()) input.focus();
-    });
-
-    // ── self-playing boot sequence ──────────────────────────────
-    const inputline = document.getElementById("inputline");
-    let skipped = false;
-    const sleep = (ms) => new Promise((r) => setTimeout(r, skipped ? 0 : ms));
-
-    async function typeText(el, text, speed) {
-      for (let i = 0; i < text.length; i++) {
-        if (skipped) {
-          el.textContent = text;
-          return;
-        }
-        el.textContent += text[i];
-        await sleep(speed + Math.random() * 45);
-      }
-    }
-
-    function addGap() {
-      const g = document.createElement("span");
-      g.className = "gap";
-      output.appendChild(g);
-    }
-
-    function renderContacts() {
-      const wrap = document.createElement("div");
-      wrap.className = "contact";
-      for (const c of contacts) {
-        const k = document.createElement("span");
-        k.className = "k";
-        k.textContent = c.label;
-        const a = document.createElement("a");
-        a.className = "link";
-        a.href = c.href;
-        a.rel = "me noopener";
-        a.textContent = c.display;
-        wrap.append(k, a);
-      }
-      output.appendChild(wrap);
-    }
-
-    function printName() {
-      const d = document.createElement("div");
-      d.className = "line out";
-      const h = document.createElement("h1");
-      h.textContent = name;
-      d.appendChild(h);
-      output.appendChild(d);
-    }
-
-    async function boot() {
-      inputline.style.display = "none";
-      const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (reduce) {
-        inputline.style.display = "";
-        input.focus();
-        return;
-      }
-      output.replaceChildren(); // clear the static session, then replay it live
-
-      const steps = [
-        { cmd: "whoami", run: printName },
-        { cmd: "cat role.txt", run: () => print(tagline, "accent") },
-        { cmd: "cat about.txt", run: () => print(intro, "out") },
-        { cmd: "ls contact/", run: renderContacts },
-      ];
-
-      for (const s of steps) {
-        const line = document.createElement("div");
-        line.className = "line";
-        line.innerHTML = promptHTML();
-        const cmdEl = document.createElement("span");
-        cmdEl.className = "cmd";
-        const cur = document.createElement("span");
-        cur.className = "cursor";
-        line.append(cmdEl, cur);
-        output.appendChild(line);
-        scrollBottom();
-
-        await sleep(320);
-        await typeText(cmdEl, s.cmd, 70);
-        await sleep(240); // pause before "enter"
-        cur.remove();
-        s.run();
-        addGap();
-        scrollBottom();
-        await sleep(430);
-      }
-
-      const h = document.createElement("div");
-      h.className = "line dim";
-      h.id = "hint";
-      h.textContent = "type `help` and press enter";
-      output.appendChild(h);
-      inputline.style.display = "";
-      input.focus();
-      scrollBottom();
-    }
-
-    // Any key or click fast-forwards the intro.
-    const skip = () => (skipped = true);
-    window.addEventListener("keydown", skip, { once: true });
-    screen.addEventListener("click", skip, { once: true });
-
-    boot();
+  {
+    /*
+    No `is:inline` anywhere on this page: Astro bundles this script, which is
+    what lets `security.csp` cover it. Being a module it is also deferred, so
+    the DOM is ready, and nothing leaks to `window`.
+  */
+  }
+  <script>
+    import "../scripts/shell.ts";
   </script>
 </Base>
