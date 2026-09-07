@@ -1,0 +1,83 @@
+# https://taskfile.dev — run `task` on its own to list everything.
+#
+# Node comes from aqua.yaml, so the whole setup is:
+#   aqua i && task preview
+version: "3"
+
+# aqua installs its shims into `$(aqua root-dir)/bin`, which is only on PATH if
+# you have wired aqua into your shell globally. We can't rely on that, and
+# `aqua exec -- npm` is NOT enough on its own: aqua runs npm fine, but npm's own
+# `#!/usr/bin/env node` shebang then looks up `node` on PATH and fails. So every
+# command gets aqua's bin prepended to PATH instead.
+#
+# (Task's top-level `env:` cannot do this — its shell resolves binaries against
+# the real process environment, so a PATH set there is silently ignored.)
+#
+# Without aqua installed, AQUA_BIN is empty, the prefix disappears, and a plain
+# system npm/node is used.
+vars:
+  AQUA_BIN:
+    sh: a=$(aqua root-dir 2>/dev/null) && echo "$a/bin" || true
+  WITH_AQUA: '{{if .AQUA_BIN}}PATH="{{.AQUA_BIN}}:$PATH"{{end}}'
+
+tasks:
+  default:
+    desc: List the available tasks
+    cmds:
+      - task --list
+    silent: true
+
+  versions:
+    desc: Show which toolchain the tasks will actually use
+    cmds:
+      - "{{.WITH_AQUA}} node --version"
+      - "{{.WITH_AQUA}} npm --version"
+    silent: true
+
+  install:
+    desc: Install dependencies from the lockfile
+    cmds:
+      - "{{.WITH_AQUA}} npm ci"
+    # Skipped when the lockfile hasn't changed since the last install.
+    sources:
+      - package-lock.json
+    generates:
+      - node_modules/.package-lock.json
+
+  dev:
+    desc: Dev server on :4321. Fast reload, but no CSP — use `preview` for that
+    deps: [install]
+    cmds:
+      - "{{.WITH_AQUA}} npm run dev"
+
+  preview:
+    desc: Build and serve the real output on :4321. This is the one with CSP
+    deps: [install]
+    cmds:
+      - "{{.WITH_AQUA}} npm run build"
+      - "{{.WITH_AQUA}} npm run preview"
+
+  check:
+    desc: Everything CI runs — types, formatting, build
+    deps: [install]
+    cmds:
+      - "{{.WITH_AQUA}} npm run check"
+      - "{{.WITH_AQUA}} npm run format:check"
+      - "{{.WITH_AQUA}} npm run build"
+
+  fmt:
+    desc: Format the whole repo with prettier
+    deps: [install]
+    cmds:
+      - "{{.WITH_AQUA}} npm run format"
+
+  images:
+    desc: Regenerate public/og.png and public/apple-touch-icon.png
+    deps: [install]
+    cmds:
+      - "{{.WITH_AQUA}} npm run images"
+
+  clean:
+    desc: Remove build output and installed dependencies
+    cmds:
+      - rm -rf dist .astro node_modules

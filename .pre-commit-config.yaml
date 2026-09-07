@@ -1,0 +1,21 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+  - repo: https://github.com/rbubley/mirrors-prettier
+    rev: v3.9.6
+    hooks:
+      - id: prettier
+        # identify may not tag .astro, so select files explicitly rather than
+        # relying on the hook's default type filter (which would make the
+        # prettier-plugin-astro dependency below inert).
+        types: [file]
+        files: \.(astro|css|html|js|json|md|mjs|ts|ya?ml)$
+        additional_dependencies:
+          - prettier@3.9.6
+          - prettier-plugin-astro@0.14.1
