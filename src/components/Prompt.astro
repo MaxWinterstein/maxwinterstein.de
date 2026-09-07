@@ -1,0 +1,11 @@
+---
+// The shell prompt, shared by the homepage, the input line and the 404 page.
+// The gap after `$` is a non-breaking space on purpose: a literal space here is
+// whitespace-collapsed away by compressHTML once a formatter wraps the line.
+// `promptHTML()` in index.astro builds the same markup for JS-echoed commands.
+import { CANONICAL_DOMAIN } from "../config";
+---
+
+<span class="u">guest@{CANONICAL_DOMAIN}</span><span class="p">:~</span><span
+  class="sym">$&#160;</span
+>

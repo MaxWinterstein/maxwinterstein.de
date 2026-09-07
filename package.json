@@ -1,16 +1,29 @@
 {
-  "name": "website",
+  "name": "maxwinterstein.de",
   "type": "module",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": ">=22.18.0"
+  },
   "scripts": {
-    "prebuild": "node scripts/write-cname.mjs",
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
+    "check": "astro check",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "images": "node scripts/make-images.mjs",
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^5.7.0"
+    "astro": "^7.3.1"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "prettier": "^3.9.6",
+    "prettier-plugin-astro": "^0.14.1",
+    "sharp": "^0.35.4",
+    "typescript": "^5.9.3"
   }
 }

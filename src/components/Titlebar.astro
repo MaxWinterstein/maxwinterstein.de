@@ -1,0 +1,38 @@
+---
+interface Props {
+  title: string;
+  /** Wire the dots up as working window controls. Homepage only — the other
+   *  pages have no shell to talk to, so there the dots stay decorative. */
+  interactive?: boolean;
+}
+
+const { title, interactive = false } = Astro.props;
+
+const DOTS = [
+  { cls: "r", action: "close", label: "Close window" },
+  { cls: "y", action: "minimize", label: "Minimize window" },
+  { cls: "g", action: "zoom", label: "Zoom window" },
+] as const;
+---
+
+<div class="titlebar">
+  <div class="dots">
+    {
+      DOTS.map((d) =>
+        interactive ? (
+          <button
+            type="button"
+            class={`dot ${d.cls}`}
+            data-window={d.action}
+            aria-label={d.label}
+            aria-pressed={d.action === "close" ? undefined : "false"}
+            disabled
+          />
+        ) : (
+          <span class={`dot ${d.cls}`} />
+        ),
+      )
+    }
+  </div>
+  <span class="title">{title}</span>
+</div>

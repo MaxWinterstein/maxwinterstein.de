@@ -1,0 +1,42 @@
+---
+import Base from "../layouts/Base.astro";
+import Prompt from "../components/Prompt.astro";
+import Titlebar from "../components/Titlebar.astro";
+import { site, CANONICAL_DOMAIN } from "../config";
+
+// GitHub Pages serves dist/404.html for any unmatched path automatically.
+---
+
+<Base title={`404 — ${site.name}`} description="Page not found.">
+  <div class="terminal">
+    <Titlebar title={`guest@${CANONICAL_DOMAIN}: ~`} />
+
+    <div class="screen">
+      <div class="line">
+        <Prompt /><span class="cmd">cd <span id="path">that page</span></span>
+      </div>
+      <div class="line err" id="msg">
+        bash: cd: that page: No such file or directory
+      </div>
+      <span class="gap"></span>
+      <div class="line">
+        <Prompt /><a class="link" href="/">cd ~</a><span
+          class="cursor"
+          aria-hidden="true"></span>
+      </div>
+    </div>
+  </div>
+
+  <p class="pagefoot"><a href="/datenschutz/">Datenschutz</a></p>
+
+  <script>
+    // Show the path the visitor actually asked for. textContent, so it's inert.
+    const asked = location.pathname + location.search;
+    const path = document.getElementById("path");
+    const msg = document.getElementById("msg");
+    if (asked && asked !== "/" && path && msg) {
+      path.textContent = asked;
+      msg.textContent = `bash: cd: ${asked}: No such file or directory`;
+    }
+  </script>
+</Base>

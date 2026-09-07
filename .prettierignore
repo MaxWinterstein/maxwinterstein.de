@@ -1,0 +1,4 @@
+dist/
+.astro/
+scripts/.fonts/
+package-lock.json

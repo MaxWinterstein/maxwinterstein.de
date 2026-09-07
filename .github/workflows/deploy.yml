@@ -3,34 +3,53 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  # Build (but don't deploy) pull requests, so a broken build is caught before merge.
+  pull_request:
   workflow_dispatch:
 
-# Allow this workflow to publish to GitHub Pages.
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
-# Allow one concurrent deployment; don't cancel an in-progress run.
+# Actions are pinned to commit SHAs rather than tags, which are mutable;
+# Renovate keeps the pins current via helpers:pinGitHubActionDigests.
+
+# One run per ref; never cancel a deployment that is already publishing.
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - name: Build with Astro
-        uses: withastro/action@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Nothing after this pushes, so don't leave the token in .git/config.
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      # `npm ci` (not `install`) so CI is bound to the lockfile.
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: dist
 
   deploy:
+    if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

@@ -5,29 +5,54 @@ import { site, SITE_URL } from "../config";
 interface Props {
   title?: string;
   description?: string;
+  /** Overrides <html lang> for pages not written in `site.lang`. */
+  lang?: string;
 }
 
-const { title = site.name, description = site.intro } = Astro.props;
+const {
+  title = site.name,
+  description = site.intro,
+  lang = site.lang,
+} = Astro.props;
+
+// `no-js` is stripped by src/scripts/shell.ts once the shell is live, so the
+// prompt is never shown while it's inert. A <noscript><style> would be blocked
+// by our own CSP — Astro can only hash styles it processes.
 const canonical = new URL(Astro.url.pathname, SITE_URL).href;
+const ogImage = new URL("/og.png", SITE_URL).href;
+
+// Open Graph wants `language_TERRITORY`; map the locales we actually ship.
+const OG_LOCALES: Record<string, string> = { en: "en_US", de: "de_DE" };
+const ogLocale = OG_LOCALES[lang] ?? "en_US";
 ---
 
 <!doctype html>
-<html lang={site.lang}>
+<html lang={lang} class="no-js">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#0d1117" />
+    <meta name="theme-color" content={site.themeColor} />
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
     <!-- Open Graph / social preview -->
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:locale" content={ogLocale} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content={`A terminal window reading: ${site.name} — ${site.tagline}`}
+    />
+    <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body>
     <main>

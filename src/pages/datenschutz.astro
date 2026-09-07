@@ -1,19 +1,16 @@
 ---
 import Base from "../layouts/Base.astro";
-import { site, CANONICAL_DOMAIN } from "../config";
+import Titlebar from "../components/Titlebar.astro";
+import { site, CANONICAL_DOMAIN, EMAIL } from "../config";
 ---
 
 <Base
   title={`Datenschutz — ${site.name}`}
   description={`Datenschutzerklärung für ${CANONICAL_DOMAIN}`}
+  lang="de"
 >
   <div class="terminal">
-    <div class="titlebar">
-      <span class="dot r"></span>
-      <span class="dot y"></span>
-      <span class="dot g"></span>
-      <span class="title">cat datenschutz.txt</span>
-    </div>
+    <Titlebar title="cat datenschutz.txt" />
 
     <div class="doc">
       <h1>Datenschutzerklärung</h1>
@@ -21,28 +18,32 @@ import { site, CANONICAL_DOMAIN } from "../config";
 
       <h2>Verantwortlicher</h2>
       <p>
-        {site.name} · <a href="mailto:hello@maxwinterstein.de">hello@maxwinterstein.de</a>
+        {site.name} · <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
       </p>
 
       <h2>Hosting</h2>
       <p>
-        Diese Seite wird über GitHub Pages (GitHub, Inc., USA) ausgeliefert. Beim
-        Aufruf überträgt dein Browser technisch notwendige Daten (u. a. IP-Adresse,
-        Zeitpunkt, angeforderte Datei, User-Agent), die GitHub zur Auslieferung und
-        Absicherung in Server-Logs verarbeitet. Rechtsgrundlage: Art. 6 Abs. 1 lit. f
-        DSGVO (sicherer, funktionsfähiger Betrieb). Details:
-        <a href="https://docs.github.com/site-policy" rel="noopener">docs.github.com/site-policy</a>.
+        Diese Seite wird über GitHub Pages (GitHub, Inc., USA) ausgeliefert.
+        Beim Aufruf überträgt dein Browser technisch notwendige Daten (u. a.
+        IP-Adresse, Zeitpunkt, angeforderte Datei, User-Agent), die GitHub zur
+        Auslieferung und Absicherung in Server-Logs verarbeitet.
+        Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (sicherer, funktionsfähiger
+        Betrieb). Details:
+        <a href="https://docs.github.com/site-policy" rel="noopener"
+          >docs.github.com/site-policy</a
+        >.
       </p>
 
       <h2>Cookies &amp; Tracking</h2>
       <p>
-        Diese Seite setzt keine Cookies, nutzt keinen Local Storage und bindet keine
-        Analyse- oder Tracking-Dienste ein.
+        Diese Seite setzt keine Cookies, nutzt keinen Local Storage und bindet
+        keine Analyse- oder Tracking-Dienste ein.
       </p>
 
       <p>
-        Fragen zu deinen Daten sowie dein Beschwerderecht bei einer Aufsichtsbehörde:
-        <a href="mailto:hello@maxwinterstein.de">hello@maxwinterstein.de</a>.
+        Fragen zu deinen Daten sowie dein Beschwerderecht bei einer
+        Aufsichtsbehörde:
+        <a href={`mailto:${EMAIL}`}>{EMAIL}</a>.
       </p>
 
       <p class="stand">Stand: Juni 2026</p>
@@ -83,14 +84,15 @@ import { site, CANONICAL_DOMAIN } from "../config";
   .doc a:hover {
     text-decoration: underline;
   }
-  .stand {
+  /* Descendant selectors, not !important, to outrank `.doc p` / `.doc a`. */
+  .doc .stand {
+    margin-top: 1.4rem;
     color: var(--muted);
-    margin-top: 1.4rem !important;
     font-size: 0.85rem;
   }
-  .back {
+  .doc .back {
     display: inline-block;
     margin-top: 0.6rem;
-    color: var(--muted) !important;
+    color: var(--muted);
   }
 </style>

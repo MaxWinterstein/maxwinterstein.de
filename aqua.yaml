@@ -1,0 +1,21 @@
+# Pins this repo's toolchain so `aqua i` is the only prerequisite — no nvm and
+# no globally installed Node. Versions are bumped by Renovate.
+#
+# After changing a version or adding/removing a package, regenerate the artifact
+# hashes (--prune drops the old version's entries, which aqua leaves behind):
+#   aqua update-checksum -a --prune
+checksum:
+  # Off by default in aqua — without these two, installs are not verified.
+  enabled: true
+  require_checksum: true
+  supported_envs:
+    - darwin
+    - linux
+registries:
+  - type: standard
+    ref: v4.558.1 # renovate: depName=aquaproj/aqua-registry
+packages:
+  # Node — keep the major in sync with .nvmrc. Provides node, npm and npx.
+  - name: nodejs/node@v24.20.0
+  # task — the entry point for everything in Taskfile.yml.
+  - name: go-task/task@v3.53.1
